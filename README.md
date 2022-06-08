@@ -28,7 +28,7 @@ Requirement: Python 3, scipy>=1.6.0 <br>
 
 Usage: <br>
 <pre>
-<b>python identifyMotif.py --sample Ecoli_motif_motif_methylC.sequence --reference Ecoli_motif_motif_allC.sequence --output Ecoli_SignificantMotif.txt</b>
+<b>python identifyMotif.py --sample Ecoli_motif_methylC.sequence --reference Ecoli_motif_allC.sequence --output Ecoli_SignificantMotif.txt</b>
 </pre>
 
 Parameters: <br>
@@ -40,7 +40,7 @@ CCAGGA <br>
 GCAACA <br>
 ... <br>
 
-Test Files provided: --sample Ecoli_motif_motif_methylC.sequence --reference Ecoli_motif_motif_allC.sequence <br>
+Test Files provided: --sample Ecoli_motif_methylC.sequence --reference Ecoli_motif_allC.sequence <br>
 In the sample file, the C at position 4 is methylated C; in the reference file, the C at position 4 is methylated or unmethylated C. <br>
 
 --output: the first line is header <br>
