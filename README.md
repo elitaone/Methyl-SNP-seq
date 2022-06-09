@@ -1,6 +1,6 @@
 ## Methyl-SNP-seq
-Containing scripts used for Methyl-SNP-seq related analysis. <br>
-Scripts are developed and maintained by Bo Yan (New England Biolabs, yan@neb.com). <br>
+Scripts used for Methyl-SNP-seq related analysis. <br>
+Developed and maintained by Bo Yan (New England Biolabs, yan@neb.com). <br>
 
 ---------------
 ### **Read_Processing** <br>
@@ -19,6 +19,45 @@ Please see **README.pdf** for details. <br>
 
 ### **Methylation_Motif_Calling** <br>
 This directory contains two scripts used for methylation motif identificaion, including: <br>
+
+### **motifExtraction.py** <br>
+Used to extract a certain size of sequence (e.g. 8bp) containing a methylated C or C at a given position based on Methyl-SNP-seq results. <br>
+The extracted sequences can be used for methylation motif calling using identifyMotif.py and clusterMotif.py. <br>
+
+Logic: <br>
+If --contigs is provided: <br>
+&emsp;&emsp;Use the reads mapped to the target contig(s) for sequenc extraction. <br>
+Based on the methylation report, extract the nearby sequence of methylated C (methylC.sequence) or unmethylated C (unmethylC.sequence) or all C (allC.sequence). <br>
+
+Usage: <br>
+<pre>
+<b>python motifExtraction.py --input Ecoli_ABK_Deconvolution_R1.fq --report Ecoli_ABK.Deconvolution.5mC -left 1 -right 4 --sam Ecoli_ABK.sam --name Ecoli_ABK_Node-27-70 --contigs NODE_27_length_74030_cov_17.136755 NODE_70_length_61531_cov_18.801319</b>
+</pre>
+
+Parameters: <br>
+--input: Methyl-SNP-seq Deconvolution Read fastq file <br>
+--report: corresponding Deconvolution methylation report <br>
+--name: name for all output files, Default TestMotif <br>
+&emsp;&emsp;Generate Output files: <br>
+&emsp;&emsp;name.Deconvolution_R1.fq: containing reads used for seq extraction if --contigs is on. <br>
+&emsp;&emsp;name.Deconvolution.5mC: containing methylation information for reads in name.Deconvolution_R1.fq. <br>
+&emsp;&emsp;name_motif_methylC.sequence, name_motif_unmethylC.sequence and name_motif_allC.sequence, e.g. <br>
+&emsp;&emsp;e.g. <br>
+&emsp;&emsp;CCAGGC <br>
+&emsp;&emsp;CCAGGA <br>
+&emsp;&emsp;.. <br>
+&emsp;&emsp;Note: <br>
+&emsp;&emsp;name_motif_methylC.sequence and name_motif_allC.sequence can be used as input files for identifyMotif.py. <br>
+
+--left/-l INT default 1, --right/-r INT default 4: <br>
+&emsp;&emsp;-l and -r define the number of bases upstream of downstream of a methylated or unmethylated C. <br>
+&emsp;&emsp;With default setting, seq is x5mCxxxx in methylC.sequence; xCxxxx in unmethylC.sequence; xC/5mCxxxx in allC.sequence. <br>
+
+--contigs: chr(s), nargs="+",  Not required <br>
+&emsp;&emsp;If provided, only the reads mapped to the given chr(s)/contig(s) are used to extract sequences. <br>
+&emsp;&emsp;These given chr(s) must be present in the sam file otherwise no read will be used. <br>
+--sam: Not required <br>
+&emsp;&emsp;Deconvolution Reads mapped to genome assembly, only required if --contigs is provided. <br>
 
 ### **identifyMotif.py** <br>
 Use to identify the significantly methylated motif by comparing the counts in sample and in reference based on Binomial test and Bonferroni correction. <br>
@@ -99,12 +138,15 @@ The number of motif seqs in this cluster is: 64 <br>
 GGCCAGGA <br>
 TCCCAGGA <br>
 ... <br>
-&emsp;Pos1&emsp;Pos2&emsp;Pos3&emsp;Pos4&emsp;Pos5&emsp;Pos6&emsp;Pos7&emsp;Pos8 <br>
-A&emsp;16&emsp;16&emsp;0&emsp;0&emsp;64&emsp;0&emsp;0&emsp;16 <br>
-T&emsp;16&emsp;16&emsp;0&emsp;0&emsp;0&emsp;0&emsp;0&emsp;16 <br>
-C&emsp;16&emsp;16&emsp;64&emsp;64&emsp;0&emsp;0&emsp;0&emsp;16 <br>
-G&emsp;16&emsp;16&emsp;0&emsp;0&emsp;0&emsp;64&emsp;64&emsp;16 <br>
-sum(A,T,C,G) at each postiion = number of seqs in the cluster <br>
-The above motif is NNCCAGGN <br>
-the returning motif seqs can be used to call motif logo using weblogo. <br>
+
+|   | Pos1 | Pos2 | Pos3 | Pos4 | Pos5 | Pos6 | Pos7 | Pos8 |
+| ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- | ------------- |
+| A  | 16  | 16  | 0  | 0  | 64  | 0  | 0  | 16  |
+| T  | 16  | 16  | 0  | 0  | 0  | 0  | 0  | 16  |
+| C  | 16  | 16  | 64  | 64 | 0  | 0  | 0  | 16  |
+| G  | 16  | 16  | 0  | 0  | 0  | 64  | 64  | 16  |
+
+number at each postiion is the number of seqs in the cluster. <br>
+So the above motif is NNCCAGGN. <br>
+The returning motif seqs can be used to call motif logo using weblogo. <br>
 
