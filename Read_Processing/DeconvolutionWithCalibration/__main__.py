@@ -12,13 +12,13 @@ Requirements:
     FastqHandle_pairend.py, CompareBase.py, BaseCalibration.py, DeconvolutionCalibration_v2.py
 
 Purpose:
-Run DeconvolutionPipeline.py to script bash scripts to deconvolute the Methyl-SNP-seq Reads (Deconvolution Step) with Calibration:
+Run DeconvolutionWithCalibration to create a bash script to deconvolute the Methyl-SNP-seq Reads (Deconvolution Step) with Calibration:
 (1) convert the bisulfited converted Non-methyl C base in Read1 back to C if R1=T and R2=C
     Set the base quality of R1 bases that are mismatching the R2 bases to a low base quality score based on the comparison to reference genome. 
 (2) save cytosine methylation status in a report
 (3) generate a fastq file Deconvolution_R1.fq and a methylation report
 
-DeconvolutionPipeline.py to create a bash script DeconvolutionPipelinePrefix, including the following steps.
+The bash script DeconvolutionPipelinePrefix, including the following steps.
 (1) Generate BaseCalibration table and probability table based on Deconvolution_R1 and R2
     Also perform removal of PCR duplicates and selection of unimapping here. Could be skipped to speed up.
 (2) Deconvolute Read1 and Read2 including TtoC conversion, methylation calling and Base calibration.
