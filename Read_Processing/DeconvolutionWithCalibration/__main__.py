@@ -27,8 +27,7 @@ DeconvolutionPipeline.py to create a bash script DeconvolutionPipelinePrefix, in
 
 Usage:
 Run the following command to create bash scripts, then run the generated bash script:
-$python DeconvolutionPipeline.py --Read1 AccRep1_hairpin_R1_val_1.fq --Read2 AccRep1_hairpin_R2_val_2.fq --name AccRep1 --percent 0.05 \
-    --reference hg38.fa
+$python DeconvolutionWithCalibration --Read1 TestSeq_hairpin_R1_val_1.fq --Read2 TestSeq_hairpin_R2_val_2.fq --name TestSeq -–reference hg38.fa
 
 --Read1, Read2:
     illumina adapter and hairpin adapter removed Read1 and Read2 fastq files
