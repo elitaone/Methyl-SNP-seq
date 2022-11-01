@@ -28,9 +28,20 @@ Output files: TestSeq_hairpin_R1_val_1.fq, TestSeq_hairpin_R2_val_2.fq
     It is used as –cores/-j option for trim_galore.
 
 --path_to_cutadapt, --path_to_trimgalore:
-    Use this option to specify a path to the Cutadapt executable, 
+    Use this option to specify a path to the trim_galore or Cutadapt executable, 
     e.g. /mnt/home/yan/exe/TrimGalore-0.6.4/trim_galore. 
     Else it is assumed that Cutadapt or trim_galore is in the PATH.
+
+Note:
+If this pipeline does not work well (likely due to the naming or path error), you can also run trim_galore by yourself in two steps as shown below:
+Step1 to remove illumina adapter:
+$trim_galore --paired Read1.fastq.gz Read2.fastq.gz --max_n 5 --trim-n --stringency 3 --illumina --nextseq 20 --cores 2
+The trimming parameter can be adjusted based on your sequencing.
+
+Step2 to remove hairpin adapter:
+$trim_galore --paired -a ATTATGATGATGATGATGAGTGTTAGGTTTGTTGTTGTTGTTGTGGT -a2 ACCACAACAACAACAACAAACCTAACACTCATCATCATCATCATAAT \
+R1_val_1.fq.gz R2_val_2.fq.gz --dont_gzip --cores 2 –-basename NameYouWant
+Here R1_val_1.fq.gz R2_val_2.fq.gz are the output files of Step1 trimming.
 '''
 
 import time
