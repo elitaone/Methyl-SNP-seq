@@ -1,7 +1,7 @@
 ## Methyl-SNP-seq
 Scripts used for Methyl-SNP-seq related analysis. <br>
 Developed and maintained by Bo Yan (New England Biolabs, yan@neb.com). <br>
-Publication and citation: DOI: 10.1101/gr.277080.122 <br>
+Publication and citation: DOI: 10.1101/gr.277080.122
 
 ---------------
 ### **Read_Processing** <br>
