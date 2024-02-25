@@ -6,6 +6,9 @@
 Created on Oct 27, 2020
 Modifications on Aug 20:2022:
     change check_call to shell=False
+Modifications on Feb 23, 2024:
+    Modify the CalculateBayesianInference function and CreateQualityscore to address the issue of division by zero;
+    I have confirmed this change does not change the counting if sum(Base_[A,T,C,G]) != 0.
 '''
 '''
 Requirement:
@@ -156,39 +159,41 @@ class BayesianInference:
         df_count_R1, df_probability_R1 = self.CreateProblityMatrix(self.dic_type_count_R1)
         df_count_R2, df_probability_R2 = self.CreateProblityMatrix(self.dic_type_count_R2) # a certain cell value: df_probability_R1.loc['REF_A','Base_G']
 
-        BaseSum = list(df_count_R1.loc[:,"Base_A":"Base_T"].sum(axis=0)) # sum of Base_A, Base_C, Base_G, Base_T
-        BaseSum.extend(list(df_count_R2.loc[:,"Base_A":"Base_T"].sum(axis=0)))
-        for item in BaseSum:
-            if item == 0:
-                return df_count_R1, df_probability_R1, df_count_R2, df_probability_R2, {}
-        else:
+        try:
             # Likelihood: P(E|H=A) = P(REF=A, R1=G)*P(REF=A, R2=A), P(E|H=C) = P(REF=C, R1=G)*P(REF=C, R2=A)
             # e.g. R1=G, R2=A conditional probability: df_probability_R1.loc[REF, 'Base_G']*df_probability_R2.loc[REF, 'Base_A']
             # {'A': P(E|H=A), 'C': P(E|H=C), 'T': P(E|H=T), 'G': P(E|H=G)}
-            dic_Likelihood = dict(zip(['A', 'C', 'G', 'T'], \
-            [df_probability_R1.loc[REF, 'Base_{}'.format(Base_R1)]*df_probability_R2.loc[REF, 'Base_{}'.format(Base_R2)] for REF in ['REF_A', 'REF_C', 'REF_G', 'REF_T']]))
+            dic_Likelihood = dict(list(zip(['A', 'C', 'G', 'T'], \
+            [df_probability_R1.loc[REF, 'Base_{}'.format(Base_R1)]*df_probability_R2.loc[REF, 'Base_{}'.format(Base_R2)] for REF in ['REF_A', 'REF_C', 'REF_G', 'REF_T']])))
 
             # Prior probability: P(H=A) = (count_R1_REF=A + count_R2_REF=A)/(count_R1_REF=All + count_R2_REF=All)
-            dic_Priorprobability = dict(zip(['A', 'C', 'G', 'T'], \
-            [float(df_count_R1.loc[REF, 'sum']+df_count_R2.loc[REF, 'sum'])/(sum(df_count_R1.loc[:,'sum'])+sum(df_count_R2.loc[:,'sum'])) for REF in ['REF_A', 'REF_C', 'REF_G', 'REF_T']]))
+            dic_Priorprobability = dict(list(zip(['A', 'C', 'G', 'T'], \
+            [float(df_count_R1.loc[REF, 'sum']+df_count_R2.loc[REF, 'sum'])/(sum(df_count_R1.loc[:,'sum'])+sum(df_count_R2.loc[:,'sum'])) for REF in ['REF_A', 'REF_C', 'REF_G', 'REF_T']])))
 
             # Evidence: P(E) = P(E|H=A)*P(H=A) + P(E|H=C)*P(H=c) + P(E|H=T)*P(H=T) + P(E|H=G)*P(H=G)
             Evidence = sum([dic_Likelihood[key]*dic_Priorprobability[key] for key in ['A', 'C', 'G', 'T']])
-
-            # Posterior Probability: P(H=A|E) = P(E|H=A)*P(H=A)/P(E)
-            dic_Posteriorprobability = dict(zip(['A', 'C', 'G', 'T'], \
-            [dic_Likelihood[key]*dic_Priorprobability[key]/Evidence for key in ['A', 'C', 'G', 'T']]))
-
-            return df_count_R1, df_probability_R1, df_count_R2, df_probability_R2, dic_Posteriorprobability
-            # dic_Posteriorprobability: {'A': 0.402919587687, 'C': 0.00156303537087, 'T': 0.00448675310282, 'G': 0.591030623839}, means probability that REF=A is 0.402919587687 
-
+            if Evidence == 0:
+                return df_count_R1, df_probability_R1, df_count_R2, df_probability_R2, {}
+            else:
+                # Posterior Probability: P(H=A|E) = P(E|H=A)*P(H=A)/P(E)
+                dic_Posteriorprobability = dict(list(zip(['A', 'C', 'G', 'T'], \
+                [dic_Likelihood[key]*dic_Priorprobability[key]/Evidence for key in ['A', 'C', 'G', 'T']])))
+                
+                return df_count_R1, df_probability_R1, df_count_R2, df_probability_R2, dic_Posteriorprobability
+                # dic_Posteriorprobability: {'A': 0.402919587687, 'C': 0.00156303537087, 'T': 0.00448675310282, 'G': 0.591030623839}, means probability that REF=A is 0.402919587687 
+        except: # e.g. in case sum(df_count_R1.loc[:,'sum'])+sum(df_count_R2.loc[:,'sum'] == 0
+            return df_count_R1, df_probability_R1, df_count_R2, df_probability_R2, {}
+        
 def CreateQualityscore(probability):
     '''
-    0.6252511082206418 -> 5=&
-    0.34212911890837955 -> 2=#
+    probability=0.6252511082206418, return &, means QualityScore=5
+    probability=0.34212911890837955, return #, means QualityScore=2
+    probability=1, return 'NA'
     '''
-    return chr(int(math.ceil(-10*math.log10(1-probability)))+33)
-
+    try:
+        return chr(int(math.ceil(-10*math.log10(1-probability)))+33)
+    except: # in case probability==1
+        return 'NA'
 
 def Calculateprobability(i):
     '''
